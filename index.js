@@ -16,6 +16,8 @@ app.use(
     cors({
       origin: [
         "http://localhost:5173",
+        "https://assingment-twelve.web.app/",
+        "https://assingment-twelve.firebaseapp.com/"
       ],
       credentials: true,
     })
@@ -52,7 +54,7 @@ async function run() {
     app.post('/jwt', async (req, res) => {
       const user = req.body;
       console.log('token', process.env.ACCESS_TOKEN_SECRET,user);
-      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
+      const token =await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
       res.send({ token });
     })
 
@@ -90,6 +92,21 @@ async function run() {
     });
 
 
+      app.post('/add', async (req, res) => {
+      const trainer = req.body
+      console.log( 'uswe' ,trainer)
+      const result = await addAllTrainerCollection.insertOne(trainer);
+      res.send(result)
+    });
+
+
+    app.get(`/users/:email` , async (req ,res ) => {
+      // console.log(req.params)
+      const qurary ={email:req.params.email}
+      const result = await addUsersCollection.findOne(qurary);
+      res.send(result)
+
+    })
 
     // Connect the client to the server	(optional starting in v4.7)
    
