@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion ,} = require('mongodb');
 require('dotenv').config()
 
 const port = process.env.PORT || 5000;
@@ -91,7 +91,7 @@ async function run() {
       res.send(result)
     });
 
-
+      //trainer add
       app.post('/add', async (req, res) => {
       const trainer = req.body
       console.log( 'uswe' ,trainer)
@@ -100,7 +100,24 @@ async function run() {
     });
 
 
-    app.get(`/users/:email` , async (req ,res ) => {
+    app.get(`/alltrainer` , async (req ,res ) => {
+      // console.log(req.params)
+      const result = await addAllTrainerCollection.find().toArray();
+      res.send(result)
+
+    })
+
+    app.get(`/singletrainer` , async (req ,res ) => {
+      const trainer = req.body
+      console.log(trainer)
+      // const qurary ={_id: new ObjectId(_id)}
+      const result = await addAllTrainerCollection.findOne();
+      res.send(result)
+
+    })
+
+
+     app.get(`/users/:email` , async (req ,res ) => {
       // console.log(req.params)
       const qurary ={email:req.params.email}
       const result = await addUsersCollection.findOne(qurary);
