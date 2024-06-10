@@ -10,20 +10,20 @@ const port = process.env.PORT || 5000;
 
 
 //middleware
-// app.use(cors());
+
 
 app.use(
     cors({
       origin: [
         "http://localhost:5173",
-        "https://assingment-twelve.web.app/",
-        "https://assingment-twelve.firebaseapp.com/"
+        "https://assingment-twelve.web.app",
+        "https://assingment-twelve.firebaseapp.com"
       ],
       credentials: true,
     })
 );
 app.use(express.json());
-
+// app.use(cors());
 // console.log( 'name',process.env.NAME_DB)
 
 
@@ -94,7 +94,7 @@ async function run() {
       //trainer add
       app.post('/add', async (req, res) => {
       const trainer = req.body
-      console.log( 'uswe' ,trainer)
+      // console.log( 'uswe' ,trainer)
       const result = await addAllTrainerCollection.insertOne(trainer);
       res.send(result)
     });
@@ -109,7 +109,7 @@ async function run() {
 
     app.get(`/singletrainer` , async (req ,res ) => {
       const trainer = req.body
-      console.log(trainer)
+      // console.log(trainer)
       // const qurary ={_id: new ObjectId(_id)}
       const result = await addAllTrainerCollection.findOne();
       res.send(result)
