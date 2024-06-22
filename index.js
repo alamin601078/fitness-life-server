@@ -48,6 +48,8 @@ async function run() {
 
     const addUsersCollection = client.db('assingmentTwelve').collection('users');
     const addAllTrainerCollection = client.db('assingmentTwelve').collection('addAllTrainer');
+    const applyAllTrainerCollection = client.db('assingmentTwelve').collection('applayAllTrainer');
+    const addForumPostCollection = client.db('assingmentTwelve').collection('forumpost');
 
 
  
@@ -59,6 +61,7 @@ async function run() {
     })
 
     // middlewares 
+
 
     const verifyToken = (req, res, next) => {
       // console.log('inside verify token', req.headers.authorization);
@@ -75,13 +78,22 @@ async function run() {
       })
     }
 
+    // use verify admin after verifyToken
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const user = await addUsersCollection.findOne(query);
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+      next();
+    }
 
 
-    app.post('/users', async (req, res) => {
+    app.post('/users',verifyAdmin,verifyToken, async (req, res) => {
       const user = req.body
-      console.log( 'uswe' ,user)
-      // insert email if user doesnt exists: 
-      // you can do this many ways (1. email unique, 2. upsert 3. simple checking)
+      // console.log( 'uswe' ,user)
       const query = { email: user.email }
       const existingUser = await addUsersCollection.findOne(query);
       if (existingUser) {
@@ -91,11 +103,13 @@ async function run() {
       res.send(result)
     });
 
-      //trainer add
-      app.post('/add', async (req, res) => {
+ 
+
+   //trainer add
+    app.post('/add', async (req, res) => {
       const trainer = req.body
-      // console.log( 'uswe' ,trainer)
-      const result = await addAllTrainerCollection.insertOne(trainer);
+      console.log( 'uswe' ,trainer)
+      const result = await applyAllTrainerCollection.insertOne(trainer);
       res.send(result)
     });
 
@@ -117,12 +131,28 @@ async function run() {
     })
 
 
-     app.get(`/users/:email` , async (req ,res ) => {
+    app.get(`/users/:email` , async (req ,res ) => {
       // console.log(req.params)
       const qurary ={email:req.params.email}
       const result = await addUsersCollection.findOne(qurary);
       res.send(result)
 
+    })
+
+
+    app.post('/forumpost', async (req, res) => {
+      const post = req.body
+      console.log( 'uswe' ,port)
+      const result = await addForumPostCollection.insertOne(port);
+      res.send(result)
+    });
+
+    app.delete('/user/:id', async (req, res) => {
+      const id = req.params.id;
+      console.log(id)
+      const query = { _id: new ObjectId(id) }
+      const result = await addAllTrainerCollection.deleteOne(query);
+      res.send(result);
     })
 
     // Connect the client to the server	(optional starting in v4.7)
