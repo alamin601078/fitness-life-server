@@ -1,8 +1,10 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const { ObjectId } = require('mongodb');
 const { MongoClient, ServerApiVersion ,} = require('mongodb');
 require('dotenv').config()
+const jwt = require('jsonwebtoken'); 
 
 const port = process.env.PORT || 5000;
 
@@ -11,17 +13,21 @@ const port = process.env.PORT || 5000;
 
 //middleware
 
+app.use(cors({
+    origin: 'http://localhost:5173' // Allow your frontend origin
+}));
 
-app.use(
-    cors({
-      origin: [
-        "http://localhost:5173",
-        "https://assingment-twelve.web.app",
-        "https://assingment-twelve.firebaseapp.com"
-      ],
-      credentials: true,
-    })
-);
+
+// app.use(
+//     cors({
+//       origin: [
+//         "http://localhost:5173",
+//         // "https://assingment-twelve.web.app",
+//         // "https://assingment-twelve.firebaseapp.com"
+//       ],
+//       credentials: true,
+//     })
+// );
 app.use(express.json());
 // app.use(cors());
 // console.log( 'name',process.env.NAME_DB)
@@ -55,7 +61,7 @@ async function run() {
  
     app.post('/jwt', async (req, res) => {
       const user = req.body;
-      console.log('token', process.env.ACCESS_TOKEN_SECRET,user);
+      // console.log('token', process.env.ACCESS_TOKEN_SECRET,user);
       const token =await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' });
       res.send({ token });
     })
@@ -91,7 +97,7 @@ async function run() {
     }
 
 
-    app.post('/users',verifyAdmin,verifyToken, async (req, res) => {
+    app.post('/users', async (req, res) => {
       const user = req.body
       // console.log( 'uswe' ,user)
       const query = { email: user.email }
@@ -101,6 +107,7 @@ async function run() {
       }
       const result = await addUsersCollection.insertOne(user);
       res.send(result)
+      
     });
 
  
@@ -108,11 +115,18 @@ async function run() {
    //trainer add
     app.post('/add', async (req, res) => {
       const trainer = req.body
-      console.log( 'uswe' ,trainer)
+      // console.log( 'uswe' ,trainer)
       const result = await applyAllTrainerCollection.insertOne(trainer);
       res.send(result)
     });
 
+
+    app.get(`/aplayalltrainer` , async (req ,res ) => {
+      // console.log(req.params)
+      const result = await applyAllTrainerCollection.find().toArray();
+      res.send(result)
+
+    })
 
     app.get(`/alltrainer` , async (req ,res ) => {
       // console.log(req.params)
@@ -139,17 +153,37 @@ async function run() {
 
     })
 
+    app.get(`/user/:email` , async (req ,res ) => {
+      // console.log(req.params)
+      const qurary ={email:req.params.email}
+      const result = await addUsersCollection.findOne(qurary);
+      res.send(result)
+
+    })
+
 
     app.post('/forumpost', async (req, res) => {
       const post = req.body
-      console.log( 'uswe' ,port)
+      // console.log( 'uswe' ,port)
       const result = await addForumPostCollection.insertOne(port);
       res.send(result)
     });
 
+    app.patch(`/user/admin/:id`, async (req ,res) => {
+      const id = req.params.id ;
+      const filter = { _id : new ObjectId(id) };
+      const updatedDoc = {
+        $set : {
+          role: 'admin'
+        }
+      }
+      const result = await addAllTrainerCollection.updateOne(filter,updatedDoc);
+      res.send(result)
+    })
+
     app.delete('/user/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id)
+      // console.log(id)
       const query = { _id: new ObjectId(id) }
       const result = await addAllTrainerCollection.deleteOne(query);
       res.send(result);
